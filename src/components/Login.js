@@ -1,4 +1,4 @@
-// Imports
+// IMPORTS
 import React, {useState} from 'react';
 import axios from 'axios';
 import jwt_decode from 'jwt-decode';
@@ -22,20 +22,16 @@ const Login = (props) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const userData = {email, password};
-
         axios.post(`${REACT_APP_SERVER_URL}/api/users/login`, userData)
         .then(response => {
             const {token} = response.data;
-            // Save token to localStorage
-            localStorage.setItem('jwtToken', token);
-            // Set token to auth header
-            setAuthToken(token);
-            // Decode token to get the user data
-            const decoded = jwt_decode(token);
-            // Set current user
-            props.nowCurrentUser(decoded);
+            localStorage.setItem('jwtToken', token);        // Save token to localStorage
+            setAuthToken(token);                            // Set token to authentication header
+            const decoded = jwt_decode(token);              // Decode token to get the user data
+            props.nowCurrentUser(decoded);                  // Set current user
         })
         .catch(error =>{
+            console.log('------------ LOGIN ERROR ------------')
             console.log(error);
             alert('Either email or password is incorrect. Please try again.');
         });

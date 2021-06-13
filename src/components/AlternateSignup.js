@@ -1,12 +1,10 @@
-// Imports
-import React, { useState } from 'react';
+// IMPORTS
+import React, {useState} from 'react';
 import axios from 'axios';
-import { Redirect } from 'react-router-dom';
-import setAuthToken from '../utils/setAuthToken';
-import jwt_decode from 'jwt-decode';
+import {Redirect} from 'react-router-dom';
 const REACT_APP_SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
-const Signup = (props) => {
+const Signup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -29,29 +27,46 @@ const Signup = (props) => {
         setConfirmPassword(e.target.value);
     }
 
+    // .THEN() VERSION
     const handleSubmit = (e) => {
         e.preventDefault();
-
         // check to make sure passwords match
+        if (password === confirmPassword && password.length >= 8) {
+            const payload = {name, email, password};
+            let url = `${REACT_APP_SERVER_URL}/api/users/signup`;
+            axios.post(url, payload).then(response => {
+                console.log(response.data);
+                setRedirect(true);
+            }).catch(error => {
+                console.log('----------- SIGNUP ERROR -----------')
+                console.log(error);
+            });
+        } else {
+            if (!password === confirmPassword) {
+                alert('Password and Confirm Password need to match. Please try again...');
+            } else {
+                alert('Password needs to be at least 8 characters or more. Please try again...');
+            };
+        }
+    }
+
+    // ASYNC/AWAIT VERSION
+    const handleSubmittttt = async (e) => {
+        e.preventDefault();
+        // Check to make sure passwords match
         if (password === confirmPassword && password.length >= 8) {
             const payload = { name, email, password };
             let url = `${REACT_APP_SERVER_URL}/api/users/signup`;
-            axios.post(url, payload)
-            .then(response => {
-                console.log(response.data);
-                const { token } = response.data;
-                localStorage.setItem('jwtToken', token);
-                setAuthToken(token)
-                // Decode token to get the user data
-                const decoded = jwt_decode(token);
-                // Set current user
-                props.nowCurrentUser(decoded);
+            try {
+                let response = await axios.post(url, payload);
+                let { data } = response;
+                console.log(data);
                 setRedirect(true);
-            })
-            .catch(error => {
+            } catch (error) {
+                console.log('----------- SIGNUP ERROR -----------');
                 console.log(error);
-                alert('Either email already exist or an error occured on our end. Please try again...');
-            })
+                alert('Error occurred, please try again...');
+            }
         } else {
             if (!password === confirmPassword) {
                 alert('Password and Confirm Password need to match. Please try again...');
@@ -61,7 +76,7 @@ const Signup = (props) => {
         }
     }
 
-    if (redirect) return <Redirect to='/profile' />
+    if (redirect) return <Redirect to='/login' />
     
     return (
         <div className="row mt-4">
